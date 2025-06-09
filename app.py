@@ -22,7 +22,7 @@ def main():
     st.markdown("Identify potential credit defaulters for a Taiwanese bank")
     st.sidebar.markdown("This application uses machine learning to predict credit defaulters based on customer financial data.")
 
-    # Define model paths (adjust these paths to match your model locations)
+    # Define model paths 
     MODEL_PATHS = {
         "Random Forest": "models/random_forest_model.pkl",
         "XGBoost": "models/xgboost_model.pkl", 
@@ -104,15 +104,13 @@ def main():
             # Extract components
             model = model_data['model']
             scaler = model_data['scaler']
-            pca = model_data['pca']
             
             # Apply preprocessing pipeline
             X_scaled = scaler.transform(X_data)
-            X_pca = pca.transform(X_scaled)
             
             # Make predictions
-            y_pred = model.predict(X_pca)
-            y_pred_proba = model.predict_proba(X_pca)
+            y_pred = model.predict(X_scaled)
+            y_pred_proba = model.predict_proba(X_scaled)
             
             return y_pred, y_pred_proba
         except Exception as e:
@@ -142,7 +140,7 @@ def main():
                 
                 # Create PCA component names
                 n_components = len(importances)
-                feature_names = [f'PC{i+1}' for i in range(n_components)]
+                feature_names = X.columns
                 
                 # Create a DataFrame for better handling
                 feature_imp_df = pd.DataFrame({
@@ -155,15 +153,15 @@ def main():
                 
                 fig, ax = plt.subplots(figsize=(10, 8))
                 sns.barplot(data=top_features, y='feature', x='importance', palette='viridis')
-                plt.title(f'Top 15 PCA Component Importances - {model_name}')
+                plt.title(f'Feature Importance - {model_name}')
                 plt.xlabel('Importance')
-                plt.ylabel('PCA Components')
+                plt.ylabel('Features')
                 plt.tight_layout()
                 st.pyplot(fig)
                 plt.close()
                 
                 # Display feature importance table
-                st.subheader("PCA Component Importance Table")
+                st.subheader("Feature Importance Table")
                 st.dataframe(feature_imp_df, use_container_width=True)
             else:
                 st.warning(f"Feature importance not available for {model_name}")
